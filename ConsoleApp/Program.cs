@@ -19,8 +19,7 @@ try
     apu.AddDataUnit(new(DataUnitTypes.CRC, "55"u8.ToArray()));
     apu.AddDataUnit(new(DataUnitTypes.CR, "\r"u8.ToArray()));
     apu.AddDataUnit(new(DataUnitTypes.LF, "\n"u8.ToArray()));
-    Console.WriteLine(apu);
-
+    Console.WriteLine("APU: " + apu);
 }
 catch (Exception ex)
 {

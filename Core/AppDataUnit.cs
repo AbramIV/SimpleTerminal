@@ -44,25 +44,22 @@ public class AppDataUnit
         units[(int)unit.DataUnitType] = unit;
     }
 
-    public bool Validate()
-    {
-        return false;
-    }
-
     public IEnumerable<DataUnit> GetProtocolDataUnit()
     {
-        return units;
+        if (!units.Select(u => u?.DataUnitType).Contains(DataUnitTypes.Function))
+            throw new ArgumentException($"Function byte is not added.");
+
+        if (!units.Select(u => u?.DataUnitType).Contains(DataUnitTypes.Data))
+            throw new ArgumentException($"Data bytes are not added.");
+
+        return units.Where(u => u.DataUnitType == DataUnitTypes.Function ||
+                                u.DataUnitType == DataUnitTypes.Data);
     }
 
     public static AppDataUnit Parse(byte[] bytes)
     {
         return new AppDataUnit(ProtocolTypes.ASCII);
     }
-
-    //public byte[] GetAsciiCode(string input)
-    //{
-    //    return input.ToArray();
-    //}
 
     public Dictionary<DataUnitTypes, string> ToDictionary()
     {
