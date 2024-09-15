@@ -1,73 +1,52 @@
 ﻿using Core.Enums;
 using Core.Helpers;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Core;
 
 public class AppDataUnit
 {
-    private readonly DataUnit[] units;
+    private readonly Dictionary<DataUnitTypes, byte[]> units;
 
-    public AppDataUnit(ProtocolTypes type, byte[]? bytes = null)
+    public AppDataUnit(ProtocolTypes type)
     {
-        if (bytes is null)
+        byte[] prefix;
+        byte[] init;
+
+        if (type.Equals(ProtocolTypes.ASCII))
         {
-            units = new DataUnit[9];
-            units[0] = type == ProtocolTypes.ASCII ?
-                               new(DataUnitTypes.Prefix, ":"u8.ToArray()) :
-                               new(DataUnitTypes.Prefix, "0000"u8.ToArray());
+            prefix = ":"u8.ToArray();
+            init = "0"u8.ToArray();
         }
         else
-            units = new DataUnit[bytes.Length];
+        {
+            prefix = [0];
+            init = [0];
+        } 
+
+        units = new() 
+        {
+            { DataUnitTypes.Prefix, prefix},
+            { DataUnitTypes.Address, init },
+            { DataUnitTypes.Function, init },
+            { DataUnitTypes.StartRegister, init },
+            { DataUnitTypes.Length, init },
+            { DataUnitTypes.Data, init },
+            { DataUnitTypes.CRC, init },
+            { DataUnitTypes.LF, init },
+            { DataUnitTypes.CR, init }
+        };
     }
 
-    #region Methods
-
-    public void AddDataUnit(DataUnit unit)
+    public void AddBytes(DataUnitTypes type, byte[] bytes)
     {
-        ArgumentNullException.ThrowIfNull(unit);
+        ArgumentNullException.ThrowIfNull(bytes);
 
-        if (units.Select(u => u?.DataUnitType).Contains(unit.DataUnitType))
-            throw new ArgumentException($"{unit.DataUnitType} already added.");
-
-        units[(int)unit.DataUnitType] = unit;
+        units[type] = bytes;
     }
 
-    public void ReplaceDataUnit(DataUnit unit)
-    {
-        ArgumentNullException.ThrowIfNull(unit);
-        units[(int)unit.DataUnitType] = unit;
-    }
+    public IEnumerable<byte> GetProtocolDataUnit() =>
+        units[DataUnitTypes.Function].Concat(units[DataUnitTypes.Data]);
 
-    public IEnumerable<DataUnit> GetProtocolDataUnit()
-    {
-        if (!units.Select(u => u?.DataUnitType).Contains(DataUnitTypes.Function))
-            throw new ArgumentException($"Function byte is not added.");
-
-        if (!units.Select(u => u?.DataUnitType).Contains(DataUnitTypes.Data))
-            throw new ArgumentException($"Data bytes are not added.");
-
-        return units.Where(u => u.DataUnitType == DataUnitTypes.Function ||
-                                u.DataUnitType == DataUnitTypes.Data);
-    }
-
-    public static AppDataUnit Parse(byte[] bytes)
-    {
-        return new AppDataUnit(ProtocolTypes.ASCII);
-    }
-
-    public Dictionary<DataUnitTypes, string> ToDictionary()
-    {
-        return new Dictionary<DataUnitTypes, string>();
-    }
-
-    public override string ToString()
-        => string.Join("", units?.Select(u => NumConverter.DecimalToHexAsString(u?.Data)));
-
-    #endregion
+    public override string ToString() => 
+        string.Join("", units.Values.Select(NumConverter.DecimalToHexAsString));
 }
