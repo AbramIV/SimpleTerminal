@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Core.Enums;
 
-enum Terminators
+public enum Terminators
 {
-    Colon = 0x3A,
-    CarriageReturn = 0x0D,
-    LineFeed = 0x0A,
+    Colon = ':',// 0x3A,
+    CarriageReturn = '\r',// = 0x0D,
+    LineFeed = 'n'// = 0x0A,
 }

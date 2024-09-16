@@ -1,5 +1,6 @@
 ﻿using Core.Enums;
 using Core.Helpers;
+using System.Text;
 
 namespace Core;
 
@@ -9,32 +10,27 @@ public class AppDataUnit
 
     public AppDataUnit(ProtocolTypes type)
     {
-        byte[] prefix;
-        byte[] init;
-
-        if (type.Equals(ProtocolTypes.ASCII))
+        units = new()
         {
-            prefix = ":"u8.ToArray();
-            init = "0"u8.ToArray();
-        }
-        else
-        {
-            prefix = [0];
-            init = [0];
-        } 
-
-        units = new() 
-        {
-            { DataUnitTypes.Prefix, prefix},
-            { DataUnitTypes.Address, init },
-            { DataUnitTypes.Function, init },
-            { DataUnitTypes.StartRegister, init },
-            { DataUnitTypes.Length, init },
-            { DataUnitTypes.Data, init },
-            { DataUnitTypes.CRC, init },
-            { DataUnitTypes.LF, init },
-            { DataUnitTypes.CR, init }
+            { DataUnitTypes.Address, [0] },
+            { DataUnitTypes.Function, [0] },
+            { DataUnitTypes.StartRegister, [0] },
+            { DataUnitTypes.Length, [0] },
+            { DataUnitTypes.Data, [0] },
+            { DataUnitTypes.CRC, [0] }
         };
+
+        if (type.Equals(ProtocolTypes.RTU))
+        {
+            units.Add(DataUnitTypes.LF, [(byte)Terminators.CarriageReturn]);
+            units.Add(DataUnitTypes.Prefix, [(byte)Terminators.LineFeed]);
+
+            return;
+        }
+
+        units.Add(DataUnitTypes.Prefix, NumConverter.GetNibblesBytes((char)Terminators.Colon));
+        units.Add(DataUnitTypes.Prefix, NumConverter.GetNibblesBytes((char)Terminators.CarriageReturn));
+        units.Add(DataUnitTypes.Prefix, NumConverter.GetNibblesBytes((char)Terminators.LineFeed));
     }
 
     public void AddBytes(DataUnitTypes type, byte[] bytes)

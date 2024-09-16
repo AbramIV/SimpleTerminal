@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Core.Helpers;
 
-public class NumConverter
+public static class NumConverter
 {
-    public static string DecimalToHexAsString(byte[] numbers)
-    {
-        return string.Join("", DecimalToHex(numbers));
-    }
+    public static string DecimalToHexAsString(byte[] numbers) => 
+        string.Join("", DecimalToHex(numbers));
 
     public static string[] DecimalToHex(byte[] numbers)
     {
@@ -47,4 +45,7 @@ public class NumConverter
             _ => number.ToString(),
         };
     }
+
+    public static byte[] GetNibblesBytes(char symbol) =>
+        Encoding.ASCII.GetBytes(DecimalToHex((byte)symbol).ToCharArray());
 }
