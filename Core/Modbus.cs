@@ -9,7 +9,7 @@ public class Modbus : IDisposable
 {
     private readonly SerialPort port;
     private readonly Counter limiter;
-    private byte[] buffer;
+    private readonly byte[] buffer;
 
     public Modbus(string portName, int baudRate = 9600, Parity parity = Parity.None, int dataBits = 8, StopBits stopBits = StopBits.One)
     {
@@ -69,6 +69,7 @@ public class Modbus : IDisposable
     private void Limiter_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
     {
         limiter.Stop();
+        port?.DiscardInBuffer();
         throw new TimeoutException("Response timout exceeded.");
     }
 }

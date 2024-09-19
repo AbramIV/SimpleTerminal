@@ -8,6 +8,12 @@ namespace Core.Helpers;
 
 public static class NumConverter
 {
+    public static byte[] GetNibblesBytes(char symbol) =>
+        Encoding.ASCII.GetBytes(DecimalToHex((byte)symbol).ToCharArray());
+
+    public static byte[] GetNibblesBytes(string symbols) =>
+        Encoding.ASCII.GetBytes(symbols);
+
     public static string DecimalToHexAsString(byte[] numbers) => 
         string.Join("", DecimalToHex(numbers));
 
@@ -45,7 +51,4 @@ public static class NumConverter
             _ => number.ToString(),
         };
     }
-
-    public static byte[] GetNibblesBytes(char symbol) =>
-        Encoding.ASCII.GetBytes(DecimalToHex((byte)symbol).ToCharArray());
 }

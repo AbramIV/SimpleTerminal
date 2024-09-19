@@ -1,8 +1,6 @@
 ﻿using Core;
 using Core.Enums;
 using Core.Helpers;
-using System.ComponentModel;
-using System.Text;
 
 Console.Title = "Modbus interceptor";
 Console.ForegroundColor = ConsoleColor.Green;
@@ -10,21 +8,40 @@ Console.ForegroundColor = ConsoleColor.Green;
 Modbus modbus = new("COM1", 250000);
 AppDataUnit apu = new(ProtocolTypes.ASCII);
 
+var t = NumConverter.GetNibblesBytes((char)Terminators.LineFeed);
+
+Console.Write("1. Hexadecimal\n" +
+              "2. Decimal\n" +
+              "Number system: ");
+
 try
 {
-    var unitsNames = Enum.GetNames<DataUnitTypes>();
+    var system = int.Parse(Console.ReadLine());
 
-    apu.AddBytes(DataUnitTypes.Address, "2"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.Function, "3"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.StartRegister, "180"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.Length, "1"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.Data, "100"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.CRC, "55"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.CR, "\r"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.LF, "\n"u8.ToArray());
-    apu.AddBytes(DataUnitTypes.LF, "\n"u8.ToArray());
+    var types = Enum.GetNames<DataUnitTypes>().Select(Enum.Parse<DataUnitTypes>);
 
-    Console.WriteLine();
+    foreach (var type in types)
+    {
+        int unit;
+
+        if (type == DataUnitTypes.Prefix) continue;
+
+        if (type == DataUnitTypes.CRC)
+        {
+            apu.GetCRC8();
+            break;
+        }
+
+        Console.Write($"{type}: ");
+
+        unit = int.Parse(Console.ReadLine());
+
+        apu.AddBytes(type, NumConverter.GetNibblesBytes(unit.ToString("X")));
+    }
+
+    var b = apu.GetBuffer();
+
+    Console.WriteLine(apu);
 
 }
 catch (Exception ex)
