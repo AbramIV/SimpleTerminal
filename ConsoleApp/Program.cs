@@ -6,9 +6,10 @@ Console.Title = "Modbus interceptor";
 Console.ForegroundColor = ConsoleColor.Green;
 
 Modbus modbus = new("COM1", 250000);
-AppDataUnit apu = new(ProtocolTypes.ASCII);
+AppDataUnit apu = new(ProtocolTypes.RTU);
 
-var t = NumConverter.GetNibblesBytes((char)Terminators.LineFeed);
+var temp1 = NumConverter.DecToHex(0x257);
+var temp2 = NumConverter.StringToHex("257");
 
 Console.Write("1. Hexadecimal\n" +
               "2. Decimal\n" +
@@ -17,20 +18,11 @@ Console.Write("1. Hexadecimal\n" +
 try
 {
     var system = int.Parse(Console.ReadLine());
-
     var types = Enum.GetNames<DataUnitTypes>().Select(Enum.Parse<DataUnitTypes>);
 
     foreach (var type in types)
     {
         int unit;
-
-        if (type == DataUnitTypes.Prefix) continue;
-
-        if (type == DataUnitTypes.CRC)
-        {
-            apu.GetCRC8();
-            break;
-        }
 
         Console.Write($"{type}: ");
 
@@ -39,10 +31,7 @@ try
         apu.AddBytes(type, NumConverter.GetNibblesBytes(unit.ToString("X")));
     }
 
-    var b = apu.GetBuffer();
-
     Console.WriteLine(apu);
-
 }
 catch (Exception ex)
 {

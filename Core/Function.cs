@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Core.Enums;
+namespace Core;
 
-public enum DataUnitTypes
+public abstract class Function
 {
-    Address,
-    Function,
-    StartRegister,
-    Length,
-    Data
+    public int Number;
 }
