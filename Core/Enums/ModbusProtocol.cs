@@ -6,12 +6,10 @@ using System.Threading.Tasks;
 
 namespace Core.Enums;
 
-enum ModbusFunctionTypes
+public enum ModbusProtocol
 {
-    First = 1,
-    Second = 2,
-    ReadOne = 3,
-    ReadMany = 4,
-    WriteOne = 5,
-    WriteMany = 6
+    RTU,
+    TCP,
+    ASCII,
+    None
 }
