@@ -6,7 +6,7 @@ Console.Title = "Modbus interceptor";
 Console.ForegroundColor = ConsoleColor.Green;
 
 Modbus modbus = new("COM1", 250000);
-// ProtocolDataUnit pdu = ();
+Frame frame = new();
 
 var temp1 = NumConverter.DecToHex(0x257);
 var temp2 = NumConverter.StringToHex("257");

@@ -8,34 +8,37 @@ using System.Threading.Tasks;
 
 namespace Core;
 
-internal class Frame
+public class Frame
 {
-    internal byte[]? Start;
-    internal byte Address;
-    internal ProtocolDataUnit? PDU;
-    internal readonly int? CRC;
-    internal byte[]? End;
+    public byte Address;
+    public ProtocolDataUnit? PDU;
+    public readonly int? CRC;
 
-    internal Frame() { }
+    private readonly byte[] start = [0xF, 0xFF, 0xFF, 0xFF];
+    private readonly byte[] end = [0xF, 0xFF, 0xFF, 0xFF];
 
-    internal Frame(byte[]? start, byte address, ProtocolDataUnit? adu, byte[]? end)
+    public Frame() { }
+
+    public Frame(byte address, ProtocolDataUnit? pdu)
     {
-        Start = start;
         Address = address;
-        PDU = adu;
-        End = end;
+        PDU = pdu;
     }
 
-    internal IEnumerable<byte> GetAsBytes()
+    public IEnumerable<byte> GetAsBytes()
     {
-        if (Start is null || End is null || PDU is null || CRC is null)
+        if (PDU is null)
             throw new InvalidOperationException("Frame components cannot be null.");
 
-        return Start
-            .Concat([Address])
-            .Concat(PDU.GetSequence())
-            .Concat(CheckSum.Calculate_CRC16(PDU.GetSequence(), 0x8005))
-            .Concat(End);
+        if (CRC is null)
+        {
+
+        }
+
+        return start.Concat([Address])
+                    .Concat(PDU.GetSequence())
+                    .Concat(CheckSum.Calculate_CRC16(PDU.GetSequence(), 0x8005))
+                    .Concat(end);
     }
 
     /// <summary>
@@ -43,8 +46,13 @@ internal class Frame
     /// </summary>
     /// <param name="bytes">Received bytes.</param>
     /// <returns>FRame as parsed array of bytes.</returns>
-    internal static Frame GetFrame(byte[] bytes)
+    public static Frame GetFrame(byte[] bytes)
     {
         return new Frame();
+    }
+
+    public static IEnumerable<byte> GetCRC16()
+    {
+        return [0x00, 0x00];
     }
 }
