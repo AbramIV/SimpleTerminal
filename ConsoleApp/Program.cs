@@ -6,17 +6,18 @@ Console.Title = "Modbus interceptor";
 Console.ForegroundColor = ConsoleColor.Green;
 
 Modbus modbus = new("COM1", 250000);
-Frame frame = new();
-
-var temp1 = NumConverter.DecToHex(0x257);
-var temp2 = NumConverter.StringToHex("257");
-
-Console.Write("1. Hexadecimal\n" +
-              "2. Decimal\n" +
-              "Number system: ");
+ProtocolDataUnit pdu = new(ModbusFunction.ReadInputRegisters, 0, 1);
+Frame frame = new(1, pdu);
 
 try
 {
+    var data = frame.GetAsBytes();
+    
+    for (int i = 0; i < data.Count(); i++)
+    {
+        Console.Write($"{i}. {data.ElementAt(i)}\n");
+    }
+
 
     Console.WriteLine();
 }

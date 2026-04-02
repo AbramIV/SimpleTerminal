@@ -8,14 +8,16 @@ using System.Threading.Tasks;
 
 namespace Core;
 
-public class Frame
+public class Frame : IComparable<Frame>
 {
+    private const int POLYNOM = 0xA001; // Standard Modbus polynomial for CRC16
+
     public byte Address;
     public ProtocolDataUnit? PDU;
     public readonly int? CRC;
 
-    private readonly byte[] start = [0xF, 0xFF, 0xFF, 0xFF];
-    private readonly byte[] end = [0xF, 0xFF, 0xFF, 0xFF];
+    private readonly byte[] start = [0xFF, 0xFF, 0xFF, 0xFF];
+    private readonly byte[] end = [0xFF, 0xFF, 0xFF, 0xFF];
 
     public Frame() { }
 
@@ -36,8 +38,8 @@ public class Frame
         }
 
         return start.Concat([Address])
-                    .Concat(PDU.GetSequence())
-                    .Concat(CheckSum.Calculate_CRC16(PDU.GetSequence(), 0x8005))
+                    .Concat(PDU.GetAsBytesArray())
+                    .Concat(CheckSum.Calculate_CRC16(PDU.GetAsBytesArray(), POLYNOM))
                     .Concat(end);
     }
 
@@ -54,5 +56,10 @@ public class Frame
     public static IEnumerable<byte> GetCRC16()
     {
         return [0x00, 0x00];
+    }
+
+    public int CompareTo(Frame? other)
+    {
+        throw new NotImplementedException();
     }
 }
