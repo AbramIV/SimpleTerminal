@@ -5,6 +5,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Core;
 
@@ -14,10 +15,8 @@ public class Frame : IComparable<Frame>
 
     public byte Address;
     public ProtocolDataUnit? PDU;
-    public readonly int? CRC;
-
-    private readonly byte[] start = [0xFF, 0xFF, 0xFF, 0xFF];
-    private readonly byte[] end = [0xFF, 0xFF, 0xFF, 0xFF];
+    public readonly byte CRC_MSB;
+    public readonly byte CRC_LSB;
 
     public Frame() { }
 
@@ -25,6 +24,9 @@ public class Frame : IComparable<Frame>
     {
         Address = address;
         PDU = pdu;
+        var crc = CheckSum.Calculate_CRC16(PDU.GetAsBytes(), POLYNOM);
+        CRC_MSB = crc[0];
+        CRC_LSB = crc[1];
     }
 
     public IEnumerable<byte> GetAsBytes()
@@ -32,15 +34,10 @@ public class Frame : IComparable<Frame>
         if (PDU is null)
             throw new InvalidOperationException("Frame components cannot be null.");
 
-        if (CRC is null)
-        {
-
-        }
-
-        return start.Concat([Address])
-                    .Concat(PDU.GetAsBytesArray())
-                    .Concat(CheckSum.Calculate_CRC16(PDU.GetAsBytesArray(), POLYNOM))
-                    .Concat(end);
+        return new List<byte>([Address])
+                     .Concat(PDU.GetAsBytes())
+                     .Concat([CRC_MSB])
+                     .Concat([CRC_LSB]);
     }
 
     /// <summary>
@@ -53,13 +50,31 @@ public class Frame : IComparable<Frame>
         return new Frame();
     }
 
-    public static IEnumerable<byte> GetCRC16()
-    {
-        return [0x00, 0x00];
-    }
-
     public int CompareTo(Frame? other)
     {
         throw new NotImplementedException();
+    }
+
+    public void TitledFrame()
+    {
+        Console.WriteLine($"Slave address: {NumConverter.FormatHex(Address)}");
+        Console.WriteLine($"Function code: {NumConverter.FormatHex(PDU.Function)}");
+        Console.WriteLine($"Start address MSB: {NumConverter.FormatHex(PDU.StartMSB)}");
+        Console.WriteLine($"Start address LSB: {NumConverter.FormatHex(PDU.StartLSB)}");
+        Console.WriteLine($"Quantity MSB: {NumConverter.FormatHex(PDU.StartNumberMSB)}");
+        Console.WriteLine($"Quantity LSB: {NumConverter.FormatHex(PDU.StartNumberLSB)}");
+        Console.WriteLine($"CRC16 MSB: {NumConverter.FormatHex(CRC_MSB)}");
+        Console.WriteLine($"CRC16 LSB: {NumConverter.FormatHex(CRC_LSB)}");
+    }
+
+    public override string ToString()
+    {
+        var data = GetAsBytes();
+        StringBuilder sb = new();
+
+        for (int i = 0; i < data.Count(); i++)
+           sb.Append($"{NumConverter.FormatHex(data.ElementAt(i))} ");
+
+        return sb.ToString();
     }
 }

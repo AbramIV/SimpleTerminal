@@ -27,16 +27,16 @@ public static class CheckSum
     /// </summary>
     /// <param name="Message"></param>
     /// <returns></returns>
-    public static byte[] Calculate_CRC16(byte[] Message, ushort Polynom)
+    public static byte[] Calculate_CRC16(IEnumerable<byte> Message, ushort Polynom)
     {
         ushort Register = 0xFFFF; // создаем регистр, в котором будем сохранять высчитанный CRC
                                   //ushort Polynom = 0xA001; // Указываем полином, он может быть как 0xA001(старший бит справа), так и его реверс 0x8005(старший бит слева, здесь не рассматривается), при сдвиге вправо используется 0xA001
 
         // Два последних элемента массива предназначены для хранения байтов CRC.
         // Поэтому их не учитываем в расчете.
-        for (int i = 0; i < Message.Length - 2; i++) // для каждого байта в принятом\отправляемом сообщении проводим следующие операции(байты сообщения без принятого CRC)
+        for (int i = 0; i < Message.Count() - 2; i++) // для каждого байта в принятом\отправляемом сообщении проводим следующие операции(байты сообщения без принятого CRC)
         {
-            Register = (ushort)(Register ^ Message[i]); // Делим через XOR регистр на выбранный байт сообщения(от младшего к старшему)
+            Register = (ushort)(Register ^ Message.ElementAt(i)); // Делим через XOR регистр на выбранный байт сообщения(от младшего к старшему)
 
             for (int j = 0; j < 8; j++) // для каждого бита в выбранном байте делим полученный регистр на полином
             {

@@ -6,13 +6,11 @@ using System.Threading.Tasks;
 
 namespace Core.Enums;
 
-public enum ModbusFunction
+public enum ModbusReadFunction
 {
     ReadCoils = 1,
     ReadContacts = 2,
     ReadHoldingRegisters = 3,
     ReadInputRegisters = 4,
-    WriteSingleCoil = 5,
-    WriteSigleRegister = 6,
     None = 0,
 }

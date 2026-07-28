@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -35,6 +36,12 @@ public static class NumConverter
         return Convert.ToInt32(DecToHex(value).ToString("X") + HexComparer(result), 16);
     }
 
+    public static string FormatHex(byte number)
+    {
+        if (number < 16) return $"0x0{number:X}";
+        return $"{number:X}";
+    }
+
     private static string HexComparer(int number) => 
         number switch
         {
@@ -46,5 +53,4 @@ public static class NumConverter
             15 => "f",
             _ => number.ToString(),
         };
-    
 }

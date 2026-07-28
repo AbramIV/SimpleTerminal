@@ -7,17 +7,17 @@ using System.Text;
 
 namespace Core;
 
-public class ProtocolDataUnit(ModbusFunction function,int startAddress, int numberOfRegisters, byte[]? data = null)
+public abstract class ProtocolDataUnit(int startAddress)
 {
-    private readonly ModbusFunction function = function;
     private readonly byte startLSB = (byte)startAddress;
     private readonly byte startMSB = (byte)(startAddress >> 8);
-    private readonly byte numberLSB = (byte)numberOfRegisters;
-    private readonly byte numberMSB = (byte)(numberOfRegisters >> 8);
     private readonly List<byte>? unit = [];
-    private readonly byte[]? bytes = data;
 
-    public byte[] GetAsBytesArray()
+    public byte Function => (byte)function;s
+    public byte StartLSB => startLSB;
+    public byte StartMSB => startMSB;
+
+    public IEnumerable<byte> GetAsBytes()
     {
         unit?.Add((byte)function);
         unit?.Add(startMSB);
@@ -25,13 +25,19 @@ public class ProtocolDataUnit(ModbusFunction function,int startAddress, int numb
         unit?.Add(numberMSB);
         unit?.Add(numberLSB);
 
-        if (function > ModbusFunction.ReadInputRegisters && bytes is null)
-            throw new Exception("Data is null!");
-        else if (bytes is not null)
-            unit?.AddRange(bytes);
-
         if (unit is null) throw new Exception("Unit is null!");
 
         return [.. unit];
+    }
+
+    public override string ToString()
+    {
+        var data = GetAsBytes();
+        StringBuilder sb = new();
+
+        for (int i = 0; i < data.Count(); i++)
+            sb.Append($"{NumConverter.FormatHex(data.ElementAt(i))} ");
+
+        return sb.ToString();
     }
 }
